@@ -1,0 +1,971 @@
+<div class="app-shell">
+
+  <aside class="sidebar" [class.open]="sidebarOpen">
+
+    <div class="brand">
+      <div class="brand-symbol">
+        <i class="bi bi-command"></i>
+      </div>
+
+      <div>
+        <div class="brand-name">DocuMind<span>.</span></div>
+        <small>INTELLIGENCE STUDIO</small>
+      </div>
+    </div>
+
+    <div class="workspace-label">WORKSPACE</div>
+
+    <nav>
+      <button
+        *ngFor="let item of navigation"
+        class="nav-item"
+        [class.active]="page === item.name"
+        [disabled]="busy"
+        (click)="navigate(item.name)">
+
+        <i class="bi" [ngClass]="item.icon"></i>
+        <span>{{ item.name }}</span>
+
+        <i class="bi bi-chevron-right nav-arrow"></i>
+
+      </button>
+    </nav>
+
+    <div class="sidebar-bottom">
+
+      <div class="local-engine">
+
+        <div class="engine-icon">
+          <i class="bi bi-cpu"></i>
+        </div>
+
+        <div>
+          <strong>Local Intelligence</strong>
+
+          <small>
+            <span class="status-dot"
+              [class.offline]="!ai.connected">
+            </span>
+
+            {{ ai.connected ? 'Engine operational' : 'Engine offline' }}
+          </small>
+        </div>
+
+      </div>
+
+      <div class="version">
+        DOCUMIND AI <span>V2.0</span>
+      </div>
+
+    </div>
+
+  </aside>
+
+  <main class="main-area">
+
+    <header class="topbar">
+
+      <div class="breadcrumb">
+
+        <button class="icon-button mobile-menu"
+          (click)="sidebarOpen = !sidebarOpen">
+          <i class="bi bi-list"></i>
+        </button>
+
+        Workspace
+        <i class="bi bi-chevron-right"></i>
+        <strong>{{ page }}</strong>
+
+      </div>
+
+      <div class="topbar-actions">
+
+        <span class="connection-pill">
+          <span class="status-dot"
+            [class.offline]="!ai.connected">
+          </span>
+          {{ ai.connected ? 'AI Online' : 'AI Offline' }}
+        </span>
+
+        <button class="icon-button"
+          title="Refresh workspace"
+          [disabled]="busy"
+          (click)="refresh()">
+          <i class="bi bi-arrow-clockwise"></i>
+        </button>
+
+        <div class="avatar">
+          <i class="bi bi-person"></i>
+        </div>
+
+      </div>
+
+    </header>
+
+    <div class="page-content">
+
+      <div class="page-heading">
+        <div>
+          <div class="eyebrow">DOCUMENT INTELLIGENCE / 02</div>
+          <h1>{{ page }}<span>.</span></h1>
+          <p>{{ descriptions[page] }}</p>
+        </div>
+
+        <span class="private-badge">
+          <i class="bi bi-shield-check"></i>
+          LOCAL WORKSPACE
+        </span>
+      </div>
+
+      <!-- DASHBOARD -->
+
+      <section *ngIf="page === 'Dashboard'">
+
+        <div class="hero glass">
+
+          <div class="hero-content">
+
+            <span class="hero-label">
+              <i class="bi bi-stars"></i>
+              YOUR KNOWLEDGE, REIMAGINED
+            </span>
+
+            <h2>From documents<br>to <em>understanding.</em></h2>
+
+            <p>
+              Analyze information, discover insights and
+              converse with your documents through local AI.
+            </p>
+
+            <div class="button-row">
+              <button class="primary"
+                (click)="navigate('Documents')">
+                <i class="bi bi-cloud-arrow-up"></i>
+                Upload documents
+              </button>
+
+              <button class="secondary"
+                (click)="navigate('AI Chat')">
+                Start a conversation
+                <i class="bi bi-arrow-up-right"></i>
+              </button>
+            </div>
+
+          </div>
+
+          <div class="hero-art" aria-hidden="true">
+            <div class="orbit orbit-one"></div>
+            <div class="orbit orbit-two"></div>
+            <div class="orbit orbit-three"></div>
+            <div class="core-object">
+              <i class="bi bi-command"></i>
+            </div>
+            <span class="orbital-point"></span>
+          </div>
+
+        </div>
+
+        <div class="metric-grid">
+
+          <article class="metric glass">
+            <i class="bi bi-files"></i>
+            <small>TOTAL DOCUMENTS</small>
+            <strong>{{ stats.total_documents || 0 }}</strong>
+            <span>Knowledge library</span>
+          </article>
+
+          <article class="metric glass">
+            <i class="bi bi-check2-circle"></i>
+            <small>AI READY</small>
+            <strong>{{ readyDocuments.length }}</strong>
+            <span>Processed documents</span>
+          </article>
+
+          <article class="metric glass">
+            <i class="bi bi-chat-square-text"></i>
+            <small>CONVERSATIONS</small>
+            <strong>{{ conversations.length }}</strong>
+            <span>Intelligent sessions</span>
+          </article>
+
+          <article class="metric glass">
+            <i class="bi bi-journal-richtext"></i>
+            <small>SMART NOTES</small>
+            <strong>{{ notes.length }}</strong>
+            <span>Captured knowledge</span>
+          </article>
+
+        </div>
+
+        <div class="dashboard-grid">
+
+          <div class="glass panel">
+
+            <div class="panel-heading">
+              <h3>Recent documents</h3>
+              <button class="text-button"
+                (click)="navigate('Documents')">
+                View library <i class="bi bi-arrow-right"></i>
+              </button>
+            </div>
+
+            <div class="empty" *ngIf="!documents.length">
+              <i class="bi bi-folder2-open"></i>
+              <p>Your document library is empty.</p>
+            </div>
+
+            <div class="recent-row"
+              *ngFor="let doc of documents.slice(0, 5)">
+
+              <div class="file-icon">
+                <i class="bi" [ngClass]="fileIcon(doc.extension)"></i>
+              </div>
+
+              <div class="grow truncate">
+                <strong>{{ doc.filename }}</strong>
+                <small>{{ fileSize(doc.size_bytes) }}</small>
+              </div>
+
+              <span class="badge" [ngClass]="doc.status">
+                {{ doc.status }}
+              </span>
+
+            </div>
+
+          </div>
+
+          <div class="glass panel">
+
+            <div class="panel-heading">
+              <h3>Workspace overview</h3>
+            </div>
+
+            <div class="overview-item">
+              <span>Storage used</span>
+              <strong>{{ fileSize(stats.total_size_bytes) }}</strong>
+            </div>
+
+            <div class="overview-item">
+              <span>Generated summaries</span>
+              <strong>{{ summaries.length }}</strong>
+            </div>
+
+            <div class="overview-item">
+              <span>Processing pending</span>
+              <strong>{{ stats.pending_documents || 0 }}</strong>
+            </div>
+
+            <div class="overview-item">
+              <span>Processing failed</span>
+              <strong>{{ stats.failed_documents || 0 }}</strong>
+            </div>
+
+            <div class="progress-track">
+              <div [style.width.%]="documents.length
+                ? readyDocuments.length / documents.length * 100
+                : 0">
+              </div>
+            </div>
+
+            <small class="muted">Document processing completion</small>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- DOCUMENTS -->
+
+      <section *ngIf="page === 'Documents'">
+
+        <div class="upload-zone glass"
+          [class.dragging]="dragging"
+          (dragover)="$event.preventDefault(); dragging = true"
+          (dragleave)="dragging = false"
+          (drop)="onDrop($event)">
+
+          <div class="upload-symbol">
+            <i class="bi bi-cloud-arrow-up"></i>
+          </div>
+
+          <h3>Drop your knowledge here</h3>
+
+          <p>Drag and drop documents or browse your files.</p>
+
+          <label class="primary upload-button">
+            Browse files
+
+            <input type="file" multiple hidden
+              accept=".pdf,.doc,.docx,.xlsx,.xls,.csv,.txt,.md,.json"
+              [disabled]="busy"
+              (change)="onFileInput($event)">
+          </label>
+
+          <small>PDF, Word, Excel, CSV, TXT, Markdown and JSON · 50 MB/file</small>
+
+        </div>
+
+        <div class="glass panel">
+
+          <div class="panel-heading">
+            <h3>Document library</h3>
+            <span class="muted">{{ documents.length }} files</span>
+          </div>
+
+          <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input [(ngModel)]="search"
+              placeholder="Search your documents...">
+          </div>
+
+          <div class="table-wrap">
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Document</th>
+                  <th>Size</th>
+                  <th>Status</th>
+                  <th>Uploaded</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+
+                <tr *ngFor="let doc of filteredDocuments">
+
+                  <td>
+                    <div class="file-cell">
+                      <div class="file-icon">
+                        <i class="bi"
+                          [ngClass]="fileIcon(doc.extension)">
+                        </i>
+                      </div>
+                      <strong>{{ doc.filename }}</strong>
+                    </div>
+                  </td>
+
+                  <td>{{ fileSize(doc.size_bytes) }}</td>
+
+                  <td>
+                    <span class="badge" [ngClass]="doc.status">
+                      {{ doc.status }}
+                    </span>
+                  </td>
+
+                  <td>{{ doc.uploaded_at | date:'mediumDate' }}</td>
+
+                  <td>
+
+                    <div class="action-group">
+
+                      <button class="icon-button"
+                        *ngIf="doc.status !== 'processed'"
+                        title="Process document"
+                        [disabled]="busy"
+                        (click)="processDocument(doc)">
+                        <i class="bi bi-cpu"></i>
+                      </button>
+
+                      <button class="icon-button"
+                        title="Rename"
+                        [disabled]="busy"
+                        (click)="renameDocument(doc)">
+                        <i class="bi bi-pencil"></i>
+                      </button>
+
+                      <button class="icon-button"
+                        title="Download"
+                        (click)="download('/api/documents/' + doc.id + '/download')">
+                        <i class="bi bi-download"></i>
+                      </button>
+
+                      <button class="icon-button danger"
+                        title="Delete"
+                        [disabled]="busy"
+                        (click)="deleteDocument(doc)">
+                        <i class="bi bi-trash3"></i>
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+          <div class="empty" *ngIf="!filteredDocuments.length">
+            <i class="bi bi-folder2"></i>
+            <p>No documents found.</p>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- REUSABLE DOCUMENT SELECTOR -->
+
+      <ng-template #documentSelector>
+
+        <div class="selector-heading">
+          <strong>Select documents</strong>
+          <span>{{ selected.length }} selected</span>
+        </div>
+
+        <div class="document-selector">
+
+          <label class="select-document"
+            *ngFor="let doc of readyDocuments"
+            [class.selected]="selected.includes(doc.id)">
+
+            <input type="checkbox"
+              [checked]="selected.includes(doc.id)"
+              [disabled]="busy"
+              (change)="toggleDocument(doc.id)">
+
+            <i class="bi" [ngClass]="fileIcon(doc.extension)"></i>
+
+            <span>{{ doc.filename }}</span>
+
+          </label>
+
+          <p class="muted" *ngIf="!readyDocuments.length">
+            Upload and process documents first.
+          </p>
+
+        </div>
+
+      </ng-template>
+
+      <!-- AI CHAT -->
+
+      <section *ngIf="page === 'AI Chat'" class="chat-layout">
+
+        <aside class="glass panel chat-sidebar">
+
+          <h3>Conversations</h3>
+
+          <ng-container
+            *ngTemplateOutlet="documentSelector">
+          </ng-container>
+
+          <button class="primary full-width"
+            [disabled]="busy"
+            (click)="newConversation()">
+            <i class="bi bi-plus-lg"></i>
+            New conversation
+          </button>
+
+          <div class="section-label">RECENT CONVERSATIONS</div>
+
+          <div class="conversation-item"
+            *ngFor="let conversation of conversations"
+            [class.selected]="activeConversation?.id === conversation.id">
+
+            <button class="conversation-title"
+              [disabled]="busy"
+              (click)="openConversation(conversation)">
+              <i class="bi bi-chat-left"></i>
+              {{ conversation.title }}
+            </button>
+
+            <button class="icon-button"
+              title="Rename conversation"
+              [disabled]="busy"
+              (click)="renameConversation(conversation)">
+              <i class="bi bi-pencil"></i>
+            </button>
+
+            <button class="icon-button danger"
+              title="Delete conversation"
+              [disabled]="busy"
+              (click)="deleteConversation(conversation)">
+              <i class="bi bi-trash3"></i>
+            </button>
+
+          </div>
+
+        </aside>
+
+        <div class="glass chat-main">
+
+          <div class="chat-header">
+
+            <div class="engine-icon">
+              <i class="bi bi-stars"></i>
+            </div>
+
+            <div class="grow">
+              <strong>
+                {{ activeConversation?.title || 'DocuMind Assistant' }}
+              </strong>
+              <small>
+                {{ activeConversation?.document_ids?.length || 0 }}
+                linked documents
+              </small>
+            </div>
+
+            <button class="icon-button"
+              title="Export conversation"
+              *ngIf="activeConversation"
+              (click)="download('/api/chat/conversations/' + activeConversation.id + '/export')">
+              <i class="bi bi-download"></i>
+            </button>
+
+          </div>
+
+          <div class="chat-messages" id="chat-scroll">
+
+            <div class="chat-welcome" *ngIf="!messages.length">
+
+              <div class="welcome-symbol">
+                <i class="bi bi-command"></i>
+              </div>
+
+              <h2>Intelligence starts<br>with a question.</h2>
+
+              <p>
+                Select your documents and create a conversation
+                to explore their content.
+              </p>
+
+            </div>
+
+            <div class="message"
+              *ngFor="let message of messages"
+              [class.user-message]="message.role === 'user'">
+
+              <div class="message-avatar">
+                <i class="bi"
+                  [ngClass]="message.role === 'user'
+                    ? 'bi-person'
+                    : 'bi-stars'">
+                </i>
+              </div>
+
+              <div class="message-body">
+
+                <small>
+                  {{ message.role === 'user' ? 'You' : 'DocuMind AI' }}
+                </small>
+
+                <div class="message-text">
+                  {{ message.content || 'Analyzing evidence...' }}
+                </div>
+
+                <div class="source-list"
+                  *ngIf="message.sources?.length">
+
+                  <div class="section-label">RETRIEVED EVIDENCE</div>
+
+                  <details *ngFor="let source of message.sources">
+
+                    <summary>
+                      <i class="bi bi-file-earmark-text"></i>
+                      Source {{ source.source_number }}:
+                      {{ source.filename }}
+                    </summary>
+
+                    <p>{{ source.excerpt }}</p>
+
+                    <small>
+                      Relevance score: {{ source.relevance_score }}
+                    </small>
+
+                  </details>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <form class="chat-composer"
+            (ngSubmit)="sendMessage()">
+
+            <textarea
+              name="question"
+              [(ngModel)]="question"
+              [disabled]="busy"
+              maxlength="4000"
+              placeholder="Ask anything about your documents..."
+              rows="2">
+            </textarea>
+
+            <button class="primary send-button"
+              type="submit"
+              [disabled]="busy || !question.trim() || !activeConversation">
+              <i class="bi bi-arrow-up"></i>
+            </button>
+
+          </form>
+
+          <div class="chat-disclaimer">
+            AI-generated answers may contain inaccuracies.
+            Verify important information with source documents.
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- SUMMARIES -->
+
+      <section *ngIf="page === 'Summaries'" class="split-layout">
+
+        <div class="glass panel">
+
+          <h3>Generate summary</h3>
+
+          <ng-container
+            *ngTemplateOutlet="documentSelector">
+          </ng-container>
+
+          <label class="field-label">Summary format</label>
+
+          <select [(ngModel)]="summaryType">
+            <option value="brief">Brief overview</option>
+            <option value="detailed">Detailed analysis</option>
+            <option value="executive">Executive summary</option>
+            <option value="key_findings">Key findings</option>
+          </select>
+
+          <label class="check-label">
+            <input type="checkbox" [(ngModel)]="forceRefresh">
+            Regenerate instead of using cache
+          </label>
+
+          <button class="primary full-width"
+            [disabled]="busy"
+            (click)="generateSummary()">
+            <i class="bi bi-stars"></i>
+            Generate summary
+          </button>
+
+          <div class="section-label">SAVED SUMMARIES</div>
+
+          <div class="recent-row"
+            *ngFor="let summary of summaries">
+
+            <button class="conversation-title"
+              (click)="activeSummary = summary">
+
+              <i class="bi bi-file-text"></i>
+
+              <span>
+                {{ summary.summary_type.replace('_', ' ') }}
+                <small>{{ summary.created_at | date:'mediumDate' }}</small>
+              </span>
+
+            </button>
+
+            <button class="icon-button danger"
+              title="Delete summary"
+              [disabled]="busy"
+              (click)="deleteSummary(summary)">
+              <i class="bi bi-trash3"></i>
+            </button>
+
+          </div>
+
+        </div>
+
+        <div class="glass panel output-panel">
+
+          <div class="panel-heading">
+            <h3>Intelligence report</h3>
+
+            <button class="secondary"
+              *ngIf="activeSummary"
+              (click)="download('/api/summaries/' + activeSummary.id + '/export')">
+              <i class="bi bi-download"></i>
+              Export
+            </button>
+          </div>
+
+          <div class="empty" *ngIf="!activeSummary">
+            <i class="bi bi-stars"></i>
+            <h3>Clarity from complexity.</h3>
+            <p>Generate or select a saved summary.</p>
+          </div>
+
+          <div *ngIf="activeSummary">
+
+            <span class="badge processed">
+              {{ activeSummary.summary_type }}
+            </span>
+
+            <div class="report-text">
+              {{ activeSummary.content }}
+            </div>
+
+            <small class="muted">
+              Generated using {{ activeSummary.model }}
+            </small>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- SMART NOTES -->
+
+      <section *ngIf="page === 'Smart Notes'" class="split-layout">
+
+        <div class="glass panel">
+
+          <div class="panel-heading">
+            <h3>Notes library</h3>
+
+            <button class="icon-button"
+              title="New note"
+              [disabled]="busy"
+              (click)="clearNote()">
+              <i class="bi bi-plus-lg"></i>
+            </button>
+          </div>
+
+          <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input [(ngModel)]="noteSearch"
+              placeholder="Search notes...">
+          </div>
+
+          <select [(ngModel)]="noteCategory">
+            <option value="">All categories</option>
+            <option *ngFor="let category of categories"
+              [value]="category">
+              {{ category }}
+            </option>
+          </select>
+
+          <select [(ngModel)]="noteTag">
+            <option value="">All tags</option>
+            <option *ngFor="let tag of tags" [value]="tag">
+              {{ tag }}
+            </option>
+          </select>
+
+          <div class="note-card"
+            *ngFor="let note of filteredNotes">
+
+            <button class="note-title"
+              [disabled]="busy"
+              (click)="editNote(note)">
+              {{ note.title }}
+            </button>
+
+            <small>{{ note.category }} · {{ note.source_type }}</small>
+
+            <p>{{ note.content.slice(0, 110) }}...</p>
+
+            <div class="tag-list">
+              <span *ngFor="let tag of note.tags">{{ tag }}</span>
+            </div>
+
+            <div class="action-group">
+
+              <button class="icon-button"
+                title="Export note"
+                (click)="download('/api/notes/' + note.id + '/export')">
+                <i class="bi bi-download"></i>
+              </button>
+
+              <button class="icon-button danger"
+                title="Delete note"
+                [disabled]="busy"
+                (click)="deleteNote(note)">
+                <i class="bi bi-trash3"></i>
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="glass panel">
+
+          <div class="panel-heading">
+            <h3>{{ editingNote ? 'Edit note' : 'Create note' }}</h3>
+          </div>
+
+          <label class="field-label">Title</label>
+
+          <input [(ngModel)]="noteForm.title"
+            maxlength="255"
+            placeholder="Give your note a title">
+
+          <label class="field-label">Category</label>
+
+          <input [(ngModel)]="noteForm.category"
+            placeholder="General">
+
+          <label class="field-label">Tags</label>
+
+          <input [(ngModel)]="noteForm.tags"
+            placeholder="analytics, business, research">
+
+          <label class="field-label">Content</label>
+
+          <textarea [(ngModel)]="noteForm.content"
+            rows="12"
+            placeholder="Capture your ideas and insights...">
+          </textarea>
+
+          <div class="button-row">
+
+            <button class="primary"
+              [disabled]="busy"
+              (click)="saveNote()">
+              <i class="bi bi-check2"></i>
+              Save note
+            </button>
+
+            <button class="secondary"
+              [disabled]="busy"
+              (click)="clearNote()">
+              New note
+            </button>
+
+          </div>
+
+          <div class="divider"></div>
+
+          <h3>Generate with AI</h3>
+
+          <ng-container
+            *ngTemplateOutlet="documentSelector">
+          </ng-container>
+
+          <button class="secondary full-width"
+            [disabled]="busy"
+            (click)="generateNote()">
+            <i class="bi bi-stars"></i>
+            Generate structured notes
+          </button>
+
+        </div>
+
+      </section>
+
+      <!-- SETTINGS -->
+
+      <section *ngIf="page === 'Settings'">
+
+        <div class="dashboard-grid">
+
+          <div class="glass panel">
+
+            <h3><i class="bi bi-cpu"></i> AI Engine</h3>
+
+            <div class="overview-item">
+              <span>Provider</span>
+              <strong>LM Studio</strong>
+            </div>
+
+            <div class="overview-item">
+              <span>Connection</span>
+              <span class="badge"
+                [ngClass]="ai.connected ? 'processed' : 'failed'">
+                {{ ai.connected ? 'Connected' : 'Disconnected' }}
+              </span>
+            </div>
+
+            <div class="overview-item">
+              <span>Model</span>
+              <strong class="break-word">
+                {{ ai.model || 'Unavailable' }}
+              </strong>
+            </div>
+
+            <div class="overview-item">
+              <span>Execution</span>
+              <strong>Local inference</strong>
+            </div>
+
+          </div>
+
+          <div class="glass panel">
+
+            <h3><i class="bi bi-hdd-network"></i> Backend</h3>
+
+            <div class="overview-item">
+              <span>Framework</span>
+              <strong>FastAPI</strong>
+            </div>
+
+            <div class="overview-item">
+              <span>Database</span>
+              <strong>SQLite</strong>
+            </div>
+
+            <div class="overview-item">
+              <span>Connection</span>
+              <strong>{{ backend.status || 'Offline' }}</strong>
+            </div>
+
+            <div class="overview-item">
+              <span>Version</span>
+              <strong>{{ backend.version || '2.0.0' }}</strong>
+            </div>
+
+            <button class="primary full-width"
+              [disabled]="busy"
+              (click)="refresh()">
+              <i class="bi bi-arrow-clockwise"></i>
+              Check connections
+            </button>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <footer class="footer">
+        <span>DOCUMIND AI — INTELLIGENCE STUDIO</span>
+        <span>Angular · FastAPI · Qwen</span>
+      </footer>
+
+    </div>
+
+  </main>
+
+  <div class="loading-bar glass" *ngIf="busy">
+    <span class="spinner"></span>
+    <div>
+      <strong>{{ loadingText }}</strong>
+      <small>Please wait while your request is processed.</small>
+    </div>
+  </div>
+
+  <div class="toast glass"
+    *ngIf="notice"
+    [class.error]="noticeType === 'error'">
+
+    <i class="bi"
+      [ngClass]="noticeType === 'error'
+        ? 'bi-exclamation-circle'
+        : 'bi-check-circle'">
+    </i>
+
+    <span>{{ notice }}</span>
+
+    <button class="icon-button" (click)="notice = ''">
+      <i class="bi bi-x-lg"></i>
+    </button>
+
+  </div>
+
+</div>

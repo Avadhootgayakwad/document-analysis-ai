@@ -1,0 +1,46 @@
+# Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment configuration
+.env
+.env.*
+!.env.example
+
+# Angular
+node_modules/
+.angular/
+dist/
+coverage/
+
+# Private document storage
+storage/uploads/*
+storage/extracted/*
+storage/database/*
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+*.db-wal
+*.db-shm
+
+# Temporary test documents
+backend/sample_documents/
+
+# Temporary files
+*.log
+*.tmp
+*.backup
+*.bak
+
+# IDE and operating system
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
